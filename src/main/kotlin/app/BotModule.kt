@@ -21,10 +21,10 @@ import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
  */
 object BotModule {
 
-    private val telegramToken = requireTelegramToken()
+    const val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
+    const val HELP = "❓Справка"
 
-    private const val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
-    private const val HELP = "❓Справка"
+    private val telegramToken = requireTelegramToken()
 
     // Заглушка для интеграции с 1С
     private val oneCService = OneCService()
@@ -49,13 +49,27 @@ object BotModule {
 
             dispatch {
                 // Вызываем экстеншн-функции на Dispatcher
-                setupStartCommand()       // команда /start <номер_телефона>
-                setupMyTicketsHandler()   // кнопка «Мои билеты»
-                setupHelpHandler()        // кнопка «Справка»
+                command("start") {
+                    val userId = update.message?.from?.id ?: return@command
+                    val chatId = update.message?.chat?.id ?: return@command
+                    val phoneNumber = args.getOrNull(0)
+
+                    handleStartCommand(userId, chatId, phoneNumber)
+                }       // команда /start <номер_телефона>
+                text(MY_TICKETS) {
+                    val userId = message.from?.id ?: return@text
+                    val chatId = message.chat.id
+                    getTickets(chatId, userId)
+                }   // кнопка «Мои билеты»
+                text(HELP) {
+                    val chatId = message.chat.id
+                    getHelp(chatId)
+                }        // кнопка «Справка»
             }
         }
         botInstance.startPolling()
     }
+
 
     /**
      * Обрабатывает /start <номер_телефона>.
@@ -109,7 +123,7 @@ object BotModule {
             chatId = ChatId.Companion.fromId(chatId),
             text = """
                 $HELP
-                1. /start <номер_телефона>  
+                1. /start <номер_телефона> (например: https://t.me/intant_test_bot?start=79001112233)
                    Связывает указанный номер и Telegram userId, 
                    сразу возвращает список билетов.
                 
@@ -120,10 +134,7 @@ object BotModule {
                    POST /send-broadcast (JSON: {"telegramIds":[...], "message":"..."}).
                 
                 Дополнения:
-                - userId — это числовой ID (не username).
-                  Username может отсутствовать.
-                - OneCService здесь заглушка: реальное обращение к 1С 
-                  нужно дописать.
+                - userId — это числовой ID (не username), так как Username может отсутствовать.
             """.trimIndent(),
             replyMarkup = replyKeyboard
         )
@@ -139,44 +150,5 @@ object BotModule {
             text = text,
             replyMarkup = replyKeyboard
         )
-    }
-
-    /**
-     * Ниже – вспомогательные функции, чтобы Dispatcher мог вызвать
-     * нашу логику: /start, Мои билеты, Справка.
-     */
-
-    /**
-     * Расширение для Dispatcher: обрабатывает команду /start <номер_телефона>.
-     */
-    fun Dispatcher.setupStartCommand() {
-        command("start") {
-            val userId = update.message?.from?.id ?: return@command
-            val chatId = update.message?.chat?.id ?: return@command
-            val phoneNumber = args.getOrNull(0)
-
-            handleStartCommand(userId, chatId, phoneNumber)
-        }
-    }
-
-    /**
-     * Расширение для Dispatcher: обработка кнопки «Мои билеты».
-     */
-    fun Dispatcher.setupMyTicketsHandler() {
-        text(MY_TICKETS) {
-            val userId = message.from?.id ?: return@text
-            val chatId = message.chat.id
-            getTickets(chatId, userId)
-        }
-    }
-
-    /**
-     * Расширение для Dispatcher: обработка кнопки «Справка».
-     */
-    fun Dispatcher.setupHelpHandler() {
-        text(HELP) {
-            val chatId = message.chat.id
-            getHelp(chatId)
-        }
     }
 }
