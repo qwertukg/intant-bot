@@ -3,7 +3,6 @@ package kz.qwertukg.app
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
-import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.entities.ChatId
@@ -48,28 +47,28 @@ object BotModule {
             token = telegramToken
 
             dispatch {
-                // Вызываем экстеншн-функции на Dispatcher
+                // команда /start <номер_телефона>
                 command("start") {
                     val userId = update.message?.from?.id ?: return@command
                     val chatId = update.message?.chat?.id ?: return@command
                     val phoneNumber = args.getOrNull(0)
-
                     handleStartCommand(userId, chatId, phoneNumber)
-                }       // команда /start <номер_телефона>
+                }
+                // кнопка «Мои билеты»
                 text(MY_TICKETS) {
                     val userId = message.from?.id ?: return@text
                     val chatId = message.chat.id
                     getTickets(chatId, userId)
-                }   // кнопка «Мои билеты»
+                }
+                // кнопка «Справка»
                 text(HELP) {
                     val chatId = message.chat.id
                     getHelp(chatId)
-                }        // кнопка «Справка»
+                }
             }
         }
         botInstance.startPolling()
     }
-
 
     /**
      * Обрабатывает /start <номер_телефона>.
