@@ -86,7 +86,6 @@ object BotModule {
         }
 
         oneCService.connectClient(phoneNumber, userId)
-        getTickets(chatId, userId)
 
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(chatId),
@@ -94,6 +93,8 @@ object BotModule {
                     "Чтобы просмотреть билеты повторно, нажмите «$MY_TICKETS».",
             replyMarkup = replyKeyboard
         )
+
+        getTickets(chatId, userId)
     }
 
     /**
