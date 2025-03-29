@@ -1,4 +1,4 @@
-package kz.qwertukg.app
+package app
 
 /**
  * Валидирует и возвращает Telegram token из переменных окружения.

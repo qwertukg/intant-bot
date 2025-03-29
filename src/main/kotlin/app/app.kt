@@ -1,4 +1,4 @@
-package kz.qwertukg.app
+package app
 
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -14,7 +14,7 @@ import io.ktor.server.routing.*
  * Запускает Ktor-сервер на порту 8000 и Telegram-бот.
  */
 fun main() {
-    embeddedServer(Netty, port = 8000) {
+    embeddedServer(Netty, port = 8035) {
         // Подключаем ContentNegotiation (Kotlin Serialization для JSON)
         install(ContentNegotiation) {
             json()
@@ -42,6 +42,10 @@ fun Route.notificationRoutes() {
             BotModule.sendMessageToUser(tgId, message)
         }
         call.respondText(status = HttpStatusCode.OK, text = "Рассылка выполнена")
+    }
+
+    get("/") {
+        call.respondText(status = HttpStatusCode.OK, text = "BOT HOMEPAGE")
     }
 }
 

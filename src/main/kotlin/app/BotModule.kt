@@ -1,4 +1,4 @@
-package kz.qwertukg.app
+package app
 
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
@@ -8,6 +8,7 @@ import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
+import com.github.kotlintelegrambot.logging.LogLevel
 
 /**
  * Telegram-бот.
@@ -44,6 +45,7 @@ object BotModule {
      */
     fun startBot() {
         botInstance = bot {
+            logLevel = LogLevel.All()
             token = telegramToken
 
             dispatch {

@@ -35,3 +35,8 @@
 2. Выполнить:
    ```bash
    ./gradlew run
+   ```
+   
+   ```bash
+   TELEGRAM_BOT_TOKEN=[telegramm token here] nohup java -jar bot.jar > bot.log 2>&1 &
+   ```

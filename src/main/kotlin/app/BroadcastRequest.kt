@@ -1,4 +1,4 @@
-package kz.qwertukg.app
+package app
 
 import kotlinx.serialization.Serializable
 

@@ -1,4 +1,4 @@
-package kz.qwertukg.app
+package app
 
 /**
  * Заглушка для обращения к 1С.

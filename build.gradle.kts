@@ -1,5 +1,4 @@
 import java.net.URI
-import java.net.URL
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -11,7 +10,7 @@ group = "kz.qwertukg"
 version = "0.0.1"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    mainClass = "app.AppKt"
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
