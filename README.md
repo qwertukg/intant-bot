@@ -40,3 +40,30 @@
    ```bash
    TELEGRAM_BOT_TOKEN=[telegramm token here] nohup java -jar bot.jar > bot.log 2>&1 &
    ```
+   
+# AddUser Sequence Diagram
+![AddUser Sequence Diagram](src/main/resources/AddUserScenario.png)
+
+PlantUML. Paste code below here [https://www.plantuml.com/plantuml/uml](https://www.plantuml.com/plantuml/uml)
+```plantuml
+@startuml
+title СЦЕНАРИЙ-1: Регистрация нового Пользователя при покупке товара
+
+actor Пользователь
+participant БОТ_СЕРВЕР
+participant 1С_СЕРВЕР
+
+note over Пользователь: Покупает товар
+1С_СЕРВЕР -> Пользователь: Отправляет SMS: Вы купили товар! Нажмите https://promo.intant.kz?start=87054441020
+note over Пользователь: Переходит по ссылке 
+Пользователь -> БОТ_СЕРВЕР: GET: https://promo.intant.kz?start=87054441020
+note over БОТ_СЕРВЕР: Redirect to: https://t.me?start=87054441020 
+note over Пользователь: Нажимает "Открыть в Web"
+БОТ_СЕРВЕР -> 1С_СЕРВЕР: POST:https://192.168.120.215/.../AddUser{phone:"87054441020",identifier:429}
+note over 1С_СЕРВЕР: Сохраняет identifier в карточку Контрагента
+1С_СЕРВЕР -> БОТ_СЕРВЕР: JSON: [{Details:"Вы зарегистрированы!"}]
+БОТ_СЕРВЕР -> Пользователь: Сообщение от бота: Вы зарегистрированы!
+note over Пользователь: Читает сообщение от Бота
+
+@enduml
+```
