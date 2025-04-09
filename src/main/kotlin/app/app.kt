@@ -15,38 +15,27 @@ import io.ktor.server.routing.*
  */
 fun main() {
     embeddedServer(Netty, port = 8035) {
+
+
         // Подключаем ContentNegotiation (Kotlin Serialization для JSON)
         install(ContentNegotiation) {
             json()
         }
-        routing {
-            // POST /send-broadcast
-            notificationRoutes()
-        }
 
         // Инициализируем и запускаем Telegram-бот
-        BotModule.startBot()
+        val bot = BotModule.apply { startBot() }
+
+        routing {
+
+            // POST /send-broadcast
+            notificationRoutes(bot)
+
+        }
+
+
     }.start(wait = true)
 }
 
-/**
- * Маршрут /send-broadcast (POST):
- * Принимает BroadcastRequest и рассылает сообщение
- * каждому указанному telegramUserId.
- */
-fun Route.notificationRoutes() {
-    post("/send-broadcast") {
-        val data = call.receive<BroadcastRequest>()
-        val (telegramIds, message) = data
-        telegramIds.forEach { tgId ->
-            BotModule.sendMessageToUser(tgId, message)
-        }
-        call.respondText(status = HttpStatusCode.OK, text = "Рассылка выполнена")
-    }
 
-    get("/") {
-        call.respondText(status = HttpStatusCode.OK, text = "BOT HOMEPAGE")
-    }
-}
 
 

@@ -21,6 +21,7 @@ import com.github.kotlintelegrambot.logging.LogLevel
  */
 object BotModule {
 
+
     const val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
     const val HELP = "❓Справка"
 
@@ -75,7 +76,7 @@ object BotModule {
     /**
      * Обрабатывает /start <номер_телефона>.
      */
-    private fun handleStartCommand(userId: Long, chatId: Long, phoneNumber: String?) {
+    private suspend fun handleStartCommand(userId: Long, chatId: Long, phoneNumber: String?) {
         if (phoneNumber == null) {
             botInstance.sendMessage(
                 chatId = ChatId.Companion.fromId(chatId),
@@ -100,7 +101,7 @@ object BotModule {
     /**
      * Запрашивает билеты в OneCService (по userId) и отправляет в чат (chatId).
      */
-    private fun getTickets(chatId: Long, telegramUserId: Long) {
+    private suspend fun getTickets(chatId: Long, telegramUserId: Long) {
         val tickets = oneCService.getTicketsByTelegramId(telegramUserId)
         if (tickets.isNotEmpty()) {
             botInstance.sendMessage(
