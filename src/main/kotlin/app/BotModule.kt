@@ -86,12 +86,11 @@ object BotModule {
             return
         }
 
-        oneCService.connectClient(phoneNumber, userId)
+        val connectionResult = oneCService.connectClient(phoneNumber, userId)
 
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(chatId),
-            text = "Связано с номером '$phoneNumber'.\n" +
-                    "Чтобы просмотреть билеты повторно, нажмите «$MY_TICKETS».",
+            text = connectionResult,
             replyMarkup = replyKeyboard
         )
 

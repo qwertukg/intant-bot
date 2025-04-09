@@ -1,10 +1,13 @@
 package app
 
 import io.ktor.http.*
+import io.ktor.server.html.respondHtml
 import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.html.a
+import kotlinx.html.body
 
 /**
  * Маршрут /send-broadcast (POST):
@@ -28,9 +31,11 @@ fun Route.notificationRoutes(bot: BotModule) {
     //
     get("/") {
         val addressExample = "http://127.0.0.1:8035?start=87779995533"
-        val phoneNumber = call.queryParameters["start"] ?: call.respondText("WRONG PHONE NUMBER - CORRECT FORMAT: $addressExample")
+        val phoneNumber = call.queryParameters["start"]
+            ?: call.respondHtml { body { a(addressExample) { +addressExample } } }
         call.respondRedirect("https://t.me/$telegramBotName?start=$phoneNumber")
 
     }
+
 }
 
