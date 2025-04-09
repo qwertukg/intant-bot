@@ -21,11 +21,11 @@ import com.github.kotlintelegrambot.logging.LogLevel
  */
 object BotModule {
 
-
     const val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
     const val HELP = "❓Справка"
 
     private val telegramToken = requireTelegramToken()
+    private val botName = System.getenv("TELEGRAM_BOT_NAME") ?: "use @botFather"
 
     // Заглушка для интеграции с 1С
     private val oneCService = OneCService()
@@ -125,7 +125,7 @@ object BotModule {
             chatId = ChatId.Companion.fromId(chatId),
             text = """
                 $HELP
-                1. /start <номер_телефона> (например: https://t.me/intant_test_bot?start=79001112233)
+                1. /start <номер_телефона> (например: https://t.me/${botName}?start=79001112233)
                    Связывает указанный номер и Telegram userId, 
                    сразу возвращает список билетов.
                 

@@ -1,9 +1,7 @@
 package app
 
 import io.ktor.client.*
-import io.ktor.client.call.body
 import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
@@ -15,7 +13,6 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.server.application.Application
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 
@@ -26,6 +23,8 @@ class OneCService {
     val pass = System.getenv("PASS") ?: "root"
 
     val client = HttpClient(CIO) {
+
+        // TODO not used yet
         install(ContentNegotiation) {
             Json { prettyPrint = true }
         }
@@ -53,36 +52,29 @@ class OneCService {
     }
 
     suspend fun connectClient(phoneNumber: String, telegramUserId: Long): String {
-//            val response = client.submitForm(host, Parameters.build {
-//                append("phone", phoneNumber)
-//                append("identifier", telegramUserId.toString())
-//                val p = this
-//                print(p)
-//            })
 
             val response = try {
+                val user = Json.encodeToString(User1C( // TODO
+                    phoneNumber,
+                    telegramUserId
+                ))
                 client.post(host) {
                     contentType(ContentType.Application.Json)
-                    setBody("""{
-                        "phone": "$phoneNumber",
-                        "identifier": $telegramUserId
-                    }""".trimIndent())
+                    setBody(user)
                 }
             } catch (e: Throwable) {
                 throw e
             }
 
             val body = response.bodyAsText()
-            val json = Json.decodeFromString<List<Response1C>>(body)
-            println(listOf(body, response.request.toString()))
+            val json = Json.decodeFromString<List<Response1C>>(body) // TODO
 
             return json.first().Details
     }
 
 
-
     suspend fun getTicketsByTelegramId(telegramUserId: Long): List<String> {
-            return listOf("asdf", "asdf", "asdf")
+            return listOf("asdf", "asdf", "asdf") // TODO
     }
 }
 
@@ -92,7 +84,7 @@ data class Response1C(
 )
 
 @Serializable
-data class User(
+data class User1C(
     val phone: String,
-    val identifier: String,
+    val identifier: Long,
 )
