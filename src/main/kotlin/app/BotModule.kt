@@ -22,10 +22,8 @@ import com.github.kotlintelegrambot.logging.LogLevel
 object BotModule {
 
     const val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
-    const val HELP = "❓Справка"
 
     private val telegramToken = requireTelegramToken()
-    private val botName = System.getenv("TELEGRAM_BOT_NAME") ?: "use @botFather"
 
     // Заглушка для интеграции с 1С
     private val oneCService = OneCService()
@@ -36,7 +34,9 @@ object BotModule {
     // Общая клавиатура: две кнопки в одном ряду
     private val replyKeyboard = KeyboardReplyMarkup(
         keyboard = listOf(
-            listOf(KeyboardButton(text = MY_TICKETS), KeyboardButton(text = HELP))
+            listOf(
+                KeyboardButton(text = MY_TICKETS),
+            )
         ),
         resizeKeyboard = true
     )
@@ -62,11 +62,6 @@ object BotModule {
                     val userId = message.from?.id ?: return@text
                     val chatId = message.chat.id
                     getTickets(chatId, userId)
-                }
-                // кнопка «Справка»
-                text(HELP) {
-                    val chatId = message.chat.id
-                    getHelp(chatId)
                 }
             }
         }
@@ -115,31 +110,6 @@ object BotModule {
                 replyMarkup = replyKeyboard
             )
         }
-    }
-
-    /**
-     * Справка по функционалу бота.
-     */
-    private fun getHelp(chatId: Long) {
-        botInstance.sendMessage(
-            chatId = ChatId.Companion.fromId(chatId),
-            text = """
-                $HELP
-                1. /start <номер_телефона> (например: https://t.me/${botName}?start=79001112233)
-                   Связывает указанный номер и Telegram userId, 
-                   сразу возвращает список билетов.
-                
-                2. $MY_TICKETS  
-                   Повторный запрос билетов для текущего userId.
-                
-                3. Массовая рассылка  
-                   POST /send-broadcast (JSON: {"telegramIds":[...], "message":"..."}).
-                
-                Дополнения:
-                - userId — это числовой ID (не username), так как Username может отсутствовать.
-            """.trimIndent(),
-            replyMarkup = replyKeyboard
-        )
     }
 
     /**
