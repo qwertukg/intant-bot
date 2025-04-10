@@ -21,6 +21,12 @@ import com.github.kotlintelegrambot.logging.LogLevel
  */
 object BotModule {
 
+    val promoText = """
+Подробнее об итогах и условиях акции вы можете узнать по ссылке: https://www.instagram.com/intant_security/
+
+Больше информации на нашем сайте: intant.kz 🌐
+        """.trimIndent()
+
     const val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
 
     private val telegramToken = requireTelegramToken()
@@ -75,7 +81,7 @@ object BotModule {
         if (phoneNumber == null) {
             botInstance.sendMessage(
                 chatId = ChatId.Companion.fromId(chatId),
-                text = "Используйте /start <номер> (например: /start 77010001122)",
+                text = "Используйте /start <номер> (например: /start 79505551122)",
                 replyMarkup = replyKeyboard
             )
             return
@@ -83,31 +89,50 @@ object BotModule {
 
         val connectionResult = oneCService.addUser(phoneNumber, userId)
 
+        val tickets = oneCService.getTickets(userId)
+        val ticketsAsText = tickets.joinToString("\n")
+
+        val successConnectionText = """
+🎉 Поздравляем! Ваш заказ $connectionResult участвует в акции!
+
+$ticketsAsText
+
+$promoText
+        """.trimIndent()
+
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(chatId),
-            text = connectionResult,
+            text = successConnectionText,
             replyMarkup = replyKeyboard
         )
 
-        getTickets(chatId, userId)
+
     }
 
     /**
      * Запрашивает билеты в OneCService (по userId) и отправляет в чат (chatId).
      */
     private suspend fun getTickets(chatId: Long, telegramUserId: Long) {
+
         val tickets = oneCService.getTickets(telegramUserId)
         if (tickets.isNotEmpty()) {
+            val ticketsAsText = tickets.joinToString("\n")
+            val text = """
+$ticketsAsText 
+
+$promoText
+            """.trimIndent()
+
             botInstance.sendMessage(
                 chatId = ChatId.Companion.fromId(chatId),
-                text = "$MY_TICKETS:\n${tickets.joinToString("\n")}",
+                text = "$MY_TICKETS:\n$text",
                 replyMarkup = replyKeyboard
             )
         } else {
             botInstance.sendMessage(
                 chatId = ChatId.Companion.fromId(chatId),
                 text = "$MY_TICKETS:\nБилетов нет.",
-                replyMarkup = replyKeyboard
+                replyMarkup = replyKeyboard,
             )
         }
     }

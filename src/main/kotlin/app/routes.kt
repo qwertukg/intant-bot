@@ -8,7 +8,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.a
 import kotlinx.html.body
-import kotlinx.html.br
 
 /**
  * Маршрут /send-broadcast (POST):
@@ -40,7 +39,7 @@ fun Route.notificationRoutes(bot: BotModule) {
         val port = call.request.port()
         val host = call.request.host()
         val scheme = call.request.origin.scheme
-        val userAddressExample = "$scheme://$host:$port?start=83339991050EXAMPLE"
+        val userAddressExample = "$scheme://$host:$port?start=83339991050"
         call.respondHtml { body {
             +"AddUser: "
             a(userAddressExample, target = "_blank") { +userAddressExample }

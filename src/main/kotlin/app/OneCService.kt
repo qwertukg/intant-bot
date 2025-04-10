@@ -25,12 +25,6 @@ class OneCService {
     val pass = System.getenv("PASS") ?: "root"
 
     val client = HttpClient(CIO) {
-
-        // TODO not used yet
-        install(ContentNegotiation) {
-            Json { prettyPrint = true }
-        }
-
         install(Auth) {
             basic {
                 credentials {

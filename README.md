@@ -41,10 +41,8 @@
    TELEGRAM_BOT_TOKEN=[telegramm token here] nohup java -jar bot.jar > bot.log 2>&1 &
    ```
    
-# AddUser Sequence Diagram
-![AddUser Sequence Diagram](src/main/resources/AddUserScenario.png)
+# СЦЕНАРИЙ-1: Регистрация нового Пользователя при покупке товара
 
-PlantUML. Paste code below here [https://www.plantuml.com/plantuml/uml](https://www.plantuml.com/plantuml/uml)
 ```plantuml
 @startuml
 title СЦЕНАРИЙ-1: Регистрация нового Пользователя при покупке товара
@@ -62,8 +60,32 @@ note over Пользователь: Нажимает "Открыть в Web"
 БОТ_СЕРВЕР -> 1С_СЕРВЕР: POST:https://192.168.120.215/.../AddUser{phone:"87054441020",identifier:429}
 note over 1С_СЕРВЕР: Сохраняет identifier в карточку Контрагента
 1С_СЕРВЕР -> БОТ_СЕРВЕР: JSON: [{Details:"Вы зарегистрированы!"}]
+note over БОТ_СЕРВЕР: Формирование сообщения 
 БОТ_СЕРВЕР -> Пользователь: Сообщение от бота: Вы зарегистрированы!
 note over Пользователь: Читает сообщение от Бота
-
 @enduml
 ```
+
+# СЦЕНАРИЙ-2: Просмотр билетов Пользователя
+
+```plantuml
+@startuml
+title СЦЕНАРИЙ-2: Просмотр билетов Пользователя
+
+actor Пользователь
+participant БОТ_СЕРВЕР
+participant 1С_СЕРВЕР
+
+note over Пользователь: Нажимает "Мои билеты"
+Пользователь -> БОТ_СЕРВЕР: Команда "Мои билеты" на http://192.168.121.247:8035
+note over БОТ_СЕРВЕР: Обработка команды
+БОТ_СЕРВЕР -> 1С_СЕРВЕР: POST: https://192.168.120.215/.../GetTickets{identifier:429}
+note over 1С_СЕРВЕР: Поиск билетов
+1С_СЕРВЕР -> БОТ_СЕРВЕР: [{Details:["ТД000005428/1"]}]
+note over БОТ_СЕРВЕР: Формирование сообщения 
+БОТ_СЕРВЕР -> Пользователь: Список билетов
+note over Пользователь: Читает сообщение от Бота
+@enduml
+```
+
+PlantUML. Paste code below here [https://www.plantuml.com/plantuml/uml](https://www.plantuml.com/plantuml/uml)
