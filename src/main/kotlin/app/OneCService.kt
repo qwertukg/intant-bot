@@ -54,7 +54,7 @@ class OneCService {
     suspend fun connectClient(phoneNumber: String, telegramUserId: Long): String {
 
             val response = try {
-                val user = Json.encodeToString(User1C( // TODO
+                val user = Json.encodeToString(AddUserRequest( // TODO
                     phoneNumber,
                     telegramUserId
                 ))
@@ -67,24 +67,38 @@ class OneCService {
             }
 
             val body = response.bodyAsText()
-            val json = Json.decodeFromString<List<Response1C>>(body) // TODO
+            val json = Json.decodeFromString<List<AddUserResponse>>(body) // TODO
 
             return json.first().Details
     }
 
 
     suspend fun getTicketsByTelegramId(telegramUserId: Long): List<String> {
-            return listOf("asdf", "asdf", "asdf") // TODO
+        val response = try {
+            val ticketsRequest = Json.encodeToString(TicketsRequest( // TODO
+                telegramUserId
+            ))
+            client.post(host) {
+                contentType(ContentType.Application.Json)
+                setBody(ticketsRequest)
+            }
+        } catch (e: Throwable) {
+            throw e
+        }
+
+        val body = response.bodyAsText()
+
+        return listOf("asdf", "asdf", "asdf", body) // TODO
     }
 }
 
 @Serializable
-data class Response1C(
-    val Details: String
-)
+data class AddUserRequest(val phone: String, val identifier: Long)
 
 @Serializable
-data class User1C(
-    val phone: String,
-    val identifier: Long,
-)
+data class AddUserResponse(val Details: String)
+
+
+
+@Serializable
+data class TicketsRequest(val identifier: Long)
