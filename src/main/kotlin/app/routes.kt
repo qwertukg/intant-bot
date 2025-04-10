@@ -29,16 +29,22 @@ fun Route.notificationRoutes(bot: BotModule) {
         call.respondText(status = HttpStatusCode.OK, text = "Рассылка выполнена")
     }
 
-    //
     get("/") {
+        val phoneNumber = call.queryParameters["start"] ?: call.respondRedirect("/test")
+        call.respondRedirect("https://t.me/$telegramBotName?start=$phoneNumber")
+
+    }
+
+    //
+    get("/test") {
         val port = call.request.port()
         val host = call.request.host()
         val scheme = call.request.origin.scheme
         val userAddressExample = "$scheme://$host:$port?start=83339991050EXAMPLE"
-        val phoneNumber = call.queryParameters["start"] ?: call.respondHtml { body {
-            a(userAddressExample) { +userAddressExample }
+        call.respondHtml { body {
+            +"AddUser: "
+            a(userAddressExample, target = "_blank") { +userAddressExample }
         } }
-        call.respondRedirect("https://t.me/$telegramBotName?start=$phoneNumber")
 
     }
 

@@ -86,7 +86,7 @@ object BotModule {
             return
         }
 
-        val connectionResult = oneCService.connectClient(phoneNumber, userId)
+        val connectionResult = oneCService.addUser(phoneNumber, userId)
 
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(chatId),
@@ -101,7 +101,7 @@ object BotModule {
      * Запрашивает билеты в OneCService (по userId) и отправляет в чат (chatId).
      */
     private suspend fun getTickets(chatId: Long, telegramUserId: Long) {
-        val tickets = oneCService.getTicketsByTelegramId(telegramUserId)
+        val tickets = oneCService.getTickets(telegramUserId)
         if (tickets.isNotEmpty()) {
             botInstance.sendMessage(
                 chatId = ChatId.Companion.fromId(chatId),

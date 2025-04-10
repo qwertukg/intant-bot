@@ -13,7 +13,9 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
 
 
@@ -51,54 +53,64 @@ class OneCService {
         }
     }
 
-    suspend fun connectClient(phoneNumber: String, telegramUserId: Long): String {
+    suspend fun addUser(phoneNumber: String, telegramUserId: Long): String {
+        val userRequest = Json.encodeToString(AddUserRequest(
+            phoneNumber,
+            telegramUserId
+        ))
 
-            val response = try {
-                val user = Json.encodeToString(AddUserRequest( // TODO
-                    phoneNumber,
-                    telegramUserId
-                ))
-                client.post(host) {
-                    contentType(ContentType.Application.Json)
-                    setBody(user)
-                }
-            } catch (e: Throwable) {
-                throw e
-            }
+        // AddUser
+        val response = client.post("$host/AddUser") {
+            contentType(ContentType.Application.Json)
+            setBody(userRequest)
+        }
 
-            val body = response.bodyAsText()
-            val json = Json.decodeFromString<List<AddUserResponse>>(body) // TODO
+        val bodyAsText = response.bodyAsText()
+        val json = Json.decodeFromString<List<ErrorResponse>>(bodyAsText)
 
-            return json.first().Details
+        return json.first().details
     }
 
 
-    suspend fun getTicketsByTelegramId(telegramUserId: Long): List<String> {
-        val response = try {
-            val ticketsRequest = Json.encodeToString(TicketsRequest( // TODO
-                telegramUserId
-            ))
-            client.post(host) {
-                contentType(ContentType.Application.Json)
-                setBody(ticketsRequest)
-            }
-        } catch (e: Throwable) {
-            throw e
+    suspend fun getTickets(telegramUserId: Long): List<String> {
+        val ticketsRequest = Json.encodeToString(GetTicketsRequest(
+            telegramUserId
+        ))
+
+        val response = client.post("$host/GetTickets") {
+            contentType(ContentType.Application.Json)
+            setBody(ticketsRequest)
         }
 
-        val body = response.bodyAsText()
-
-        return listOf("asdf", "asdf", "asdf", body) // TODO
+        val bodyAsText = response.bodyAsText()
+        return try {
+            Json.decodeFromString<List<OkResponse>>(bodyAsText).first().details
+        } catch (e: SerializationException) {
+            val err = Json.decodeFromString<List<ErrorResponse>>(bodyAsText)
+            listOf(err.first().details)
+        }
     }
 }
 
 @Serializable
-data class AddUserRequest(val phone: String, val identifier: Long)
+data class AddUserRequest(
+    val phone: String,
+    val identifier: Long
+)
+@Serializable
+data class GetTicketsRequest(
+    val identifier: Long
+)
+
+
 
 @Serializable
-data class AddUserResponse(val Details: String)
-
-
-
+data class OkResponse(
+    @SerialName("Details")
+    val details: List<String>
+)
 @Serializable
-data class TicketsRequest(val identifier: Long)
+data class ErrorResponse(
+    @SerialName("Details")
+    val details: String
+)
