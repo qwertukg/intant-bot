@@ -7,6 +7,7 @@ import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.request
 import io.ktor.http.ContentType
@@ -80,7 +81,7 @@ class OneCService(val app: Application, ) {
 
     }
 
-    suspend fun addUser(phoneNumber: String, telegramUserId: Long): String {
+    suspend fun addUser(phoneNumber: String, telegramUserId: Long): OkResponse? {
         val userRequest = Json.encodeToString(AddUserRequest(
             phoneNumber,
             telegramUserId
@@ -92,14 +93,11 @@ class OneCService(val app: Application, ) {
             setBody(userRequest)
         }
 
-        val bodyAsText = response.bodyAsText()
-        val json = Json.decodeFromString<List<ErrorResponse>>(bodyAsText)
-
-        return json.first().details
+        return response.toOkResponse()
     }
 
 
-    suspend fun getTickets(telegramUserId: Long): List<String>? {
+    suspend fun getTickets(telegramUserId: Long): OkResponse? {
         val ticketsRequest = Json.encodeToString(GetTicketsRequest(
             telegramUserId
         ))
@@ -109,12 +107,20 @@ class OneCService(val app: Application, ) {
             setBody(ticketsRequest)
         }
 
-        val bodyAsText = response.bodyAsText()
+        return response.toOkResponse()
+    }
 
-        return try {
-            Json.decodeFromString<List<OkResponse>>(bodyAsText).first().details
+    private suspend fun HttpResponse.toOkResponse() = try {
+        val okResponse = Json.decodeFromString<List<OkResponse>>(bodyAsText())
+        app.log.info("==> OkResponse: $okResponse")
+        okResponse.first()
+    } catch (e: SerializationException) {
+        try {
+            val errorResponse = Json.decodeFromString<List<ErrorResponse>>(bodyAsText()).first()
+            app.log.warn("==> ErrorResponse: $errorResponse")
+            OkResponse(listOf(errorResponse.details), errorResponse.description)
         } catch (e: SerializationException) {
-            app.log.warn(e.message)
+            app.log.error(e.message)
             null
         }
     }

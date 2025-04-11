@@ -91,12 +91,16 @@ class BotModule(val app: Application) {
 
         val ticketNumber = oneCService.addUser(phoneNumber, userId)
 
-        val tickets = oneCService.getTickets(userId) ?: emptyList()
+        val ticketsOkResponse = oneCService.getTickets(userId)
+        val tickets = ticketsOkResponse?.details ?: emptyList()
+        val description = ticketsOkResponse?.description
 
         val successConnectionText = """
-🎉 Поздравляем! Ваш заказ [$ticketNumber] участвует в акции!
+🎉 Поздравляем! Ваш заказ [${ticketNumber?.details?.firstOrNull()}] участвует в акции!
 
 $MY_TICKETS: ${tickets.count()}
+
+$description
 
 $promoText
         """.trimIndent()
@@ -112,13 +116,15 @@ $promoText
      * Запрашивает билеты в OneCService (по userId) и отправляет в чат (chatId).
      */
     private suspend fun getTickets(chatId: Long, telegramUserId: Long) {
-
-        val tickets = oneCService.getTickets(telegramUserId)
+        val ticketsOkResponse = oneCService.getTickets(telegramUserId)
+        val tickets = ticketsOkResponse?.details
 
         val ticketsAsText = tickets?.joinToString("\n") ?: ""
 
         val text = """
 $ticketsAsText 
+
+${ticketsOkResponse?.description}
 
 $promoText
         """.trimIndent()
