@@ -96,7 +96,7 @@ class BotModule(val app: Application) {
         val description = ticketsOkResponse?.description
 
         val successConnectionText = """
-🎉 Поздравляем! Ваш заказ [${ticketNumber?.details?.firstOrNull()}] участвует в акции!
+🎉 Поздравляем! Ваш заказ ${ticketNumber?.details?.firstOrNull()} участвует в акции!
 
 $MY_TICKETS: ${tickets.count()}
 
