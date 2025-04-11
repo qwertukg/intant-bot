@@ -29,10 +29,15 @@ fun Route.notificationRoutes(bot: BotModule) {
     }
 
     get("/") {
-        val phoneNumber = call.queryParameters["start"] ?: call.respondRedirect("/test")
-        call.respondRedirect("https://t.me/$telegramBotName?start=$phoneNumber")
+        val phoneNumber = call.queryParameters["start"]
+        if (phoneNumber == null) {
+            call.respondRedirect("/test")
+            return@get
+        }
 
+        call.respondRedirect("https://t.me/$telegramBotName?start=$phoneNumber")
     }
+
 
     //
     get("/test") {
