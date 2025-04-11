@@ -25,8 +25,9 @@ dependencies {
     // Telegram Bot
     implementation("io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.3.0")
 
-//    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktor_version}")
-//    implementation("io.ktor:ktor-server-content-negotiation:${ktor_version}")
+    implementation("ch.qos.logback:logback-classic:1.4.12")
+    implementation("io.ktor:ktor-server-call-logging:${ktor_version}")
+
     implementation("io.ktor:ktor-client-content-negotiation:${ktor_version}")
     implementation("io.ktor:ktor-client-core:${ktor_version}")
     implementation("io.ktor:ktor-client-cio:${ktor_version}")

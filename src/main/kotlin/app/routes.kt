@@ -19,7 +19,7 @@ fun Route.notificationRoutes(bot: BotModule) {
     // имя бота в телеграмме, узнать в @botFather
     val telegramBotName = System.getenv("TELEGRAM_BOT_NAME") ?: "@botFather"
 
-    post("/send-broadcast") {
+    post("/send-ticket") {
         val data = call.receive<BroadcastRequest>()
         val (telegramIds, message) = data
         telegramIds.forEach { tgId ->
@@ -39,7 +39,7 @@ fun Route.notificationRoutes(bot: BotModule) {
         val port = call.request.port()
         val host = call.request.host()
         val scheme = call.request.origin.scheme
-        val userAddressExample = "$scheme://$host:$port?start=83339991050"
+        val userAddressExample = "$scheme://$host:$port?start=77777737575"
         call.respondHtml { body {
             +"AddUser: "
             a(userAddressExample, target = "_blank") { +userAddressExample }

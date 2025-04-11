@@ -9,6 +9,7 @@ import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import com.github.kotlintelegrambot.logging.LogLevel
+import io.ktor.server.application.Application
 
 /**
  * Telegram-бот.
@@ -19,7 +20,7 @@ import com.github.kotlintelegrambot.logging.LogLevel
  *
  * Предоставляет метод sendMessageToUser для массовой рассылки.
  */
-object BotModule {
+class BotModule(val app: Application) {
 
     val promoText = """
 Подробнее об итогах и условиях акции вы можете узнать по ссылке: https://www.instagram.com/intant_security/
@@ -27,12 +28,12 @@ object BotModule {
 Больше информации на нашем сайте: intant.kz 🌐
         """.trimIndent()
 
-    const val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
+    val MY_TICKETS = "\uD83C\uDFAB Мои билеты"
 
     private val telegramToken = requireTelegramToken()
 
     // Заглушка для интеграции с 1С
-    private val oneCService = OneCService()
+    private val oneCService = OneCService(app)
 
     // Экземпляр бота (инициализируется в startBot)
     private lateinit var botInstance: Bot

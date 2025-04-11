@@ -1,0 +1,6 @@
+package app
+
+class AppException(
+    message: String,
+    cause: Throwable? = null
+) : RuntimeException(message, cause)

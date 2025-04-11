@@ -12,39 +12,42 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.server.application.Application
+import io.ktor.server.application.log
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
 
 @Serializable
-@JsonIgnoreUnknownKeys
 data class AddUserRequest(
     val phone: String,
     val identifier: Long
 )
 
 @Serializable
-@JsonIgnoreUnknownKeys
 data class GetTicketsRequest(
     val identifier: Long
 )
 
 @Serializable
-@JsonIgnoreUnknownKeys
 data class OkResponse(
     @SerialName("Details")
-    val details: List<String>
+    val details: List<String>,
+    @SerialName("Description")
+    val description: String,
+
 )
 
 @Serializable
-@JsonIgnoreUnknownKeys
 data class ErrorResponse(
     @SerialName("Details")
-    val details: String
+    val details: String,
+    @SerialName("Description")
+    val description: String,
 )
 
-class OneCService {
+class OneCService(val app: Application, ) {
     val host = System.getenv("HOST") ?: "localhost"
     val user = System.getenv("USER") ?: "root"
     val pass = System.getenv("PASS") ?: "root"
@@ -59,17 +62,22 @@ class OneCService {
             }
         }
 
+        // если 1с НЕ отвечает 200
         HttpResponseValidator {
             validateResponse { response ->
                 if (response.status != HttpStatusCode.OK) {
                     val body = response.bodyAsText()
                     val headers = response.request.headers.toString()
-                    throw IllegalArgumentException("Нет подключения к 1С Вебсервису: $host\n" +
-                            "> body: $body\n" +
-                            "> headers: $headers\n")
+                    throw AppException("==> Не OK200 от 1С: ${response}\n" +
+                            "==> BODY: $body\n" +
+                            "==> HEADERS: $headers\n")
                 }
             }
         }
+    }
+
+    suspend fun newTicket(telegramUserId: Long, ticketNumber: String) {
+
     }
 
     suspend fun addUser(phoneNumber: String, telegramUserId: Long): String {
@@ -106,7 +114,11 @@ class OneCService {
         return try {
             Json.decodeFromString<List<OkResponse>>(bodyAsText).first().details
         } catch (e: SerializationException) {
+            app.log.warn(e.message)
             null
         }
     }
+
+
 }
+

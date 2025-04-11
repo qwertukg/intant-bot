@@ -8,7 +8,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
 
 /**
- * Запускает Ktor-сервер на порту 8000 и Telegram-бот.
+ * Запускает Ktor-сервер на порту 8035 и Telegram-бот.
  */
 fun main() {
     embeddedServer(Netty, port = 8035) {
@@ -20,7 +20,7 @@ fun main() {
         }
 
         // Инициализируем и запускаем Telegram-бот
-        val bot = BotModule.apply { startBot() }
+        val bot = BotModule(this).apply { startBot() }
 
         routing {
 
