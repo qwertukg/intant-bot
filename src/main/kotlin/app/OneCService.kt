@@ -5,7 +5,6 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -18,6 +17,32 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
 
+@Serializable
+@JsonIgnoreUnknownKeys
+data class AddUserRequest(
+    val phone: String,
+    val identifier: Long
+)
+
+@Serializable
+@JsonIgnoreUnknownKeys
+data class GetTicketsRequest(
+    val identifier: Long
+)
+
+@Serializable
+@JsonIgnoreUnknownKeys
+data class OkResponse(
+    @SerialName("Details")
+    val details: List<String>
+)
+
+@Serializable
+@JsonIgnoreUnknownKeys
+data class ErrorResponse(
+    @SerialName("Details")
+    val details: String
+)
 
 class OneCService {
     val host = System.getenv("HOST") ?: "localhost"
@@ -53,7 +78,7 @@ class OneCService {
             telegramUserId
         ))
 
-        // AddUser
+        // call AddUser
         val response = client.post("$host/AddUser") {
             contentType(ContentType.Application.Json)
             setBody(userRequest)
@@ -66,7 +91,7 @@ class OneCService {
     }
 
 
-    suspend fun getTickets(telegramUserId: Long): List<String> {
+    suspend fun getTickets(telegramUserId: Long): List<String>? {
         val ticketsRequest = Json.encodeToString(GetTicketsRequest(
             telegramUserId
         ))
@@ -77,34 +102,11 @@ class OneCService {
         }
 
         val bodyAsText = response.bodyAsText()
+
         return try {
             Json.decodeFromString<List<OkResponse>>(bodyAsText).first().details
         } catch (e: SerializationException) {
-            val err = Json.decodeFromString<List<ErrorResponse>>(bodyAsText)
-            listOf(err.first().details)
+            null
         }
     }
 }
-
-@Serializable
-data class AddUserRequest(
-    val phone: String,
-    val identifier: Long
-)
-@Serializable
-data class GetTicketsRequest(
-    val identifier: Long
-)
-
-
-
-@Serializable
-data class OkResponse(
-    @SerialName("Details")
-    val details: List<String>
-)
-@Serializable
-data class ErrorResponse(
-    @SerialName("Details")
-    val details: String
-)

@@ -78,24 +78,24 @@ object BotModule {
      * Обрабатывает /start <номер_телефона>.
      */
     private suspend fun handleStartCommand(userId: Long, chatId: Long, phoneNumber: String?) {
+
         if (phoneNumber == null) {
             botInstance.sendMessage(
                 chatId = ChatId.Companion.fromId(chatId),
-                text = "Используйте /start <номер> (например: /start 79505551122)",
+                text = promoText,
                 replyMarkup = replyKeyboard
             )
             return
         }
 
-        val connectionResult = oneCService.addUser(phoneNumber, userId)
+        val ticketNumber = oneCService.addUser(phoneNumber, userId)
 
-        val tickets = oneCService.getTickets(userId)
-        val ticketsAsText = tickets.joinToString("\n")
+        val tickets = oneCService.getTickets(userId) ?: emptyList()
 
         val successConnectionText = """
-🎉 Поздравляем! Ваш заказ $connectionResult участвует в акции!
+🎉 Поздравляем! Ваш заказ [$ticketNumber] участвует в акции!
 
-$ticketsAsText
+$MY_TICKETS: ${tickets.count()}
 
 $promoText
         """.trimIndent()
@@ -105,8 +105,6 @@ $promoText
             text = successConnectionText,
             replyMarkup = replyKeyboard
         )
-
-
     }
 
     /**
@@ -115,26 +113,20 @@ $promoText
     private suspend fun getTickets(chatId: Long, telegramUserId: Long) {
 
         val tickets = oneCService.getTickets(telegramUserId)
-        if (tickets.isNotEmpty()) {
-            val ticketsAsText = tickets.joinToString("\n")
-            val text = """
+
+        val ticketsAsText = tickets?.joinToString("\n") ?: ""
+
+        val text = """
 $ticketsAsText 
 
 $promoText
-            """.trimIndent()
+        """.trimIndent()
 
-            botInstance.sendMessage(
-                chatId = ChatId.Companion.fromId(chatId),
-                text = "$MY_TICKETS:\n$text",
-                replyMarkup = replyKeyboard
-            )
-        } else {
-            botInstance.sendMessage(
-                chatId = ChatId.Companion.fromId(chatId),
-                text = "$MY_TICKETS:\nБилетов нет.",
-                replyMarkup = replyKeyboard,
-            )
-        }
+        botInstance.sendMessage(
+            chatId = ChatId.Companion.fromId(chatId),
+            text = "$MY_TICKETS: ${tickets?.count() ?: 0}\n$text",
+            replyMarkup = replyKeyboard
+        )
     }
 
     /**
