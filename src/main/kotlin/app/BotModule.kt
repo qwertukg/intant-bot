@@ -136,10 +136,7 @@ $promoText
         )
     }
 
-    /**
-     * Публичный метод: отправка сообщения конкретному пользователю
-     * (например, при массовой рассылке).
-     */
+
     fun sendMessageToUser(telegramUserId: Long, text: String) {
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(telegramUserId),

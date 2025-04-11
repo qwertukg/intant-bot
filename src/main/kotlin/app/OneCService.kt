@@ -27,6 +27,12 @@ data class AddUserRequest(
 )
 
 @Serializable
+data class SendTicketRequest(
+    val identifier: Long,
+    val ticket: String
+)
+
+@Serializable
 data class GetTicketsRequest(
     val identifier: Long
 )
@@ -120,7 +126,7 @@ class OneCService(val app: Application, ) {
             app.log.warn("==> ErrorResponse: $errorResponse")
             OkResponse(listOf(errorResponse.details), errorResponse.description)
         } catch (e: SerializationException) {
-            app.log.error(e.message)
+            app.log.error("==> SerializationException: ${e.message}")
             null
         }
     }

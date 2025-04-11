@@ -20,11 +20,9 @@ fun Route.notificationRoutes(bot: BotModule) {
     val telegramBotName = System.getenv("TELEGRAM_BOT_NAME") ?: "@botFather"
 
     post("/send-ticket") {
-        val data = call.receive<BroadcastRequest>()
-        val (telegramIds, message) = data
-        telegramIds.forEach { tgId ->
-            bot.sendMessageToUser(tgId, message)
-        }
+        val data = call.receive<SendTicketRequest>()
+        val (userId, ticket) = data
+        bot.sendMessageToUser(userId, ticket)
         call.respondText(status = HttpStatusCode.OK, text = "Рассылка выполнена")
     }
 
