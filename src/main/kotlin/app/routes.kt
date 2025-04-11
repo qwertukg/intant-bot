@@ -1,6 +1,7 @@
 package app
 
 import io.ktor.http.*
+import io.ktor.server.application.log
 import io.ktor.server.html.respondHtml
 import io.ktor.server.plugins.origin
 import io.ktor.server.request.*
@@ -20,10 +21,11 @@ fun Route.notificationRoutes(bot: BotModule) {
     val telegramBotName = System.getenv("TELEGRAM_BOT_NAME") ?: "@botFather"
 
     post("/send-ticket") {
-        val data = call.receive<SendTicketRequest>()
-        val (userId, ticket) = data
+        val sendTicketRequest = call.receive<SendTicketRequest>()
+        val (userId, ticket) = sendTicketRequest
         bot.sendMessageToUser(userId, ticket)
         call.respondText(status = HttpStatusCode.OK, text = "Рассылка выполнена")
+        application.log.info("==> SendTicketRequest: $sendTicketRequest")
     }
 
     get("/") {
