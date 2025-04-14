@@ -137,10 +137,16 @@ $promoText
     }
 
 
-    fun sendMessageToUser(telegramUserId: Long, text: String) {
+    fun sendMessageToUser(telegramUserId: Long, ticket: String) {
+        val successConnectionText = """
+🎉 Поздравляем! Ваш заказ $ticket участвует в акции!
+
+$promoText
+        """.trimIndent()
+
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(telegramUserId),
-            text = text,
+            text = successConnectionText,
             replyMarkup = replyKeyboard
         )
     }
