@@ -122,24 +122,33 @@ $promoText
         val ticketsAsText = tickets?.joinToString("\n") ?: ""
 
         val text = """
-$ticketsAsText 
+${ticketsOkResponse?.description} - ${tickets?.count()}
 
-${ticketsOkResponse?.description}
+$ticketsAsText 
 
 $promoText
         """.trimIndent()
 
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(chatId),
-            text = "$MY_TICKETS: ${tickets?.count() ?: 0}\n$text",
+            text = "$MY_TICKETS:\n$text",
             replyMarkup = replyKeyboard
         )
     }
 
 
-    fun sendMessageToUser(telegramUserId: Long, ticket: String) {
+    suspend fun sendMessageToUser(telegramUserId: Long, ticket: String, total: Int) {
+
+        val ticketsOkResponse = oneCService.getTickets(telegramUserId)
+        val tickets = ticketsOkResponse?.details
+        val ticketsAsText = tickets?.joinToString("\n") ?: ""
+
         val successConnectionText = """
 🎉 Поздравляем! Ваш заказ $ticket участвует в акции!
+
+${ticketsOkResponse?.description} - $total
+
+$ticketsAsText 
 
 $promoText
         """.trimIndent()

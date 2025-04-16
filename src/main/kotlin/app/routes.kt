@@ -47,8 +47,8 @@ fun Route.notificationRoutes(bot: BotModule) {
 fun Route.informationRoutes(bot: BotModule) {
     post("/send-ticket") {
         val sendTicketRequest = call.receive<SendTicketRequest>()
-        val (userId, ticket) = sendTicketRequest
-        bot.sendMessageToUser(userId, ticket)
+        val (userId, ticket, totaL) = sendTicketRequest
+        bot.sendMessageToUser(userId, ticket, totaL)
         call.respondText(status = HttpStatusCode.OK, text = "Рассылка выполнена")
         application.log.info("==> SendTicketRequest: $sendTicketRequest")
     }

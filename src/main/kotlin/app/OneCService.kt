@@ -29,7 +29,8 @@ data class AddUserRequest(
 @Serializable
 data class SendTicketRequest(
     val identifier: Long,
-    val ticket: String
+    val ticket: String,
+    val total: Int
 )
 
 @Serializable
@@ -43,6 +44,8 @@ data class OkResponse(
     val details: List<String>,
     @SerialName("Description")
     val description: String,
+//    @SerialName("Total")
+//    val total: String,
 
 )
 
@@ -52,6 +55,8 @@ data class ErrorResponse(
     val details: String,
     @SerialName("Description")
     val description: String,
+//    @SerialName("Total")
+//    val total: String,
 )
 
 class OneCService(val app: Application, ) {
@@ -81,10 +86,6 @@ class OneCService(val app: Application, ) {
                 }
             }
         }
-    }
-
-    suspend fun newTicket(telegramUserId: Long, ticketNumber: String) {
-
     }
 
     suspend fun addUser(phoneNumber: String, telegramUserId: Long): OkResponse? {
