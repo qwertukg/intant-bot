@@ -30,12 +30,14 @@ data class AddUserRequest(
 data class SendTicketRequest(
     val identifier: Long,
     val ticket: String,
-    val total: Int
+    val total: Int,
+    val tickets: List<String>,
+    val description: String,
 )
 
 @Serializable
 data class GetTicketsRequest(
-    val identifier: Long
+    val identifier: Long,
 )
 
 @Serializable
@@ -44,8 +46,8 @@ data class OkResponse(
     val details: List<String>,
     @SerialName("Description")
     val description: String,
-//    @SerialName("Total")
-//    val total: String,
+    @SerialName("Total")
+    val total: Int = 0,
 
 )
 
@@ -55,8 +57,8 @@ data class ErrorResponse(
     val details: String,
     @SerialName("Description")
     val description: String,
-//    @SerialName("Total")
-//    val total: String,
+    @SerialName("Total")
+    val total: Int = 0,
 )
 
 class OneCService(val app: Application, ) {

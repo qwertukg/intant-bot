@@ -11,15 +11,6 @@ import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import com.github.kotlintelegrambot.logging.LogLevel
 import io.ktor.server.application.Application
 
-/**
- * Telegram-бот.
- * Обрабатывает:
- *   1) /start <номер_телефона>
- *   2) Кнопка «Мои билеты»
- *   3) Кнопка «Справка»
- *
- * Предоставляет метод sendMessageToUser для массовой рассылки.
- */
 class BotModule(val app: Application) {
 
     val promoText = """
@@ -32,13 +23,10 @@ class BotModule(val app: Application) {
 
     private val telegramToken = requireTelegramToken()
 
-    // Заглушка для интеграции с 1С
     private val oneCService = OneCService(app)
 
-    // Экземпляр бота (инициализируется в startBot)
     private lateinit var botInstance: Bot
 
-    // Общая клавиатура: две кнопки в одном ряду
     private val replyKeyboard = KeyboardReplyMarkup(
         keyboard = listOf(
             listOf(
@@ -48,9 +36,6 @@ class BotModule(val app: Application) {
         resizeKeyboard = true
     )
 
-    /**
-     * Создаёт и запускает Telegram-бота в режиме Long Polling.
-     */
     fun startBot() {
         botInstance = bot {
             logLevel = LogLevel.All()
@@ -75,9 +60,6 @@ class BotModule(val app: Application) {
         botInstance.startPolling()
     }
 
-    /**
-     * Обрабатывает /start <номер_телефона>.
-     */
     private suspend fun handleStartCommand(userId: Long, chatId: Long, phoneNumber: String?) {
 
         if (phoneNumber == null) {
@@ -89,18 +71,19 @@ class BotModule(val app: Application) {
             return
         }
 
-        val ticketNumber = oneCService.addUser(phoneNumber, userId)
+        val ticket = oneCService.addUser(phoneNumber, userId)
 
         val ticketsOkResponse = oneCService.getTickets(userId)
         val tickets = ticketsOkResponse?.details ?: emptyList()
         val description = ticketsOkResponse?.description
+        val ticketsAsText = tickets.joinToString("\n")
 
         val successConnectionText = """
-🎉 Поздравляем! Ваш заказ ${ticketNumber?.details?.firstOrNull()} участвует в акции!
+🎉 Поздравляем! Ваш заказ $ticket участвует в акции!
 
-$MY_TICKETS: ${tickets.count()}
+$description: ${ticketsOkResponse?.total}
 
-$description
+$ticketsAsText 
 
 $promoText
         """.trimIndent()
@@ -112,17 +95,13 @@ $promoText
         )
     }
 
-    /**
-     * Запрашивает билеты в OneCService (по userId) и отправляет в чат (chatId).
-     */
     private suspend fun getTickets(chatId: Long, telegramUserId: Long) {
         val ticketsOkResponse = oneCService.getTickets(telegramUserId)
         val tickets = ticketsOkResponse?.details
-
         val ticketsAsText = tickets?.joinToString("\n") ?: ""
 
         val text = """
-${ticketsOkResponse?.description} - ${tickets?.count()}
+${ticketsOkResponse?.description}: ${ticketsOkResponse?.total}
 
 $ticketsAsText 
 
@@ -136,17 +115,13 @@ $promoText
         )
     }
 
-
-    suspend fun sendMessageToUser(telegramUserId: Long, ticket: String, total: Int) {
-
-        val ticketsOkResponse = oneCService.getTickets(telegramUserId)
-        val tickets = ticketsOkResponse?.details
-        val ticketsAsText = tickets?.joinToString("\n") ?: ""
+    suspend fun sendMessageToUser(telegramUserId: Long, ticket: String, total: Int, tickets: List<String>, description: String) {
+        val ticketsAsText = tickets.joinToString("\n")
 
         val successConnectionText = """
 🎉 Поздравляем! Ваш заказ $ticket участвует в акции!
 
-${ticketsOkResponse?.description} - $total
+$description: $total
 
 $ticketsAsText 
 
