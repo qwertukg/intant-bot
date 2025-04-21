@@ -48,6 +48,7 @@ data class OkResponse(
     val description: String,
     @SerialName("Total")
     val total: Int = 0,
+    var isError: Boolean,
 
 )
 
@@ -122,12 +123,18 @@ class OneCService(val app: Application, ) {
     private suspend fun HttpResponse.toOkResponse() = try {
         val okResponse = Json.decodeFromString<List<OkResponse>>(bodyAsText())
         app.log.info("==> OkResponse: $okResponse")
-        okResponse.first()
+        okResponse.first().apply {
+            isError = false
+        }
     } catch (e: SerializationException) {
         try {
             val errorResponse = Json.decodeFromString<List<ErrorResponse>>(bodyAsText()).first()
             app.log.warn("==> ErrorResponse: $errorResponse")
-            OkResponse(listOf(errorResponse.details), errorResponse.description)
+            OkResponse(
+                listOf(errorResponse.details),
+                errorResponse.description,
+                isError = true
+            )
         } catch (e: SerializationException) {
             app.log.error("==> SerializationException: ${e.message}")
             null

@@ -71,18 +71,21 @@ class BotModule(val app: Application) {
             return
         }
 
-        val ticket = oneCService.addUser(phoneNumber, userId)
+        val ticketsOkResponse = oneCService.addUser(phoneNumber, userId)
 
-        val ticketsOkResponse = oneCService.getTickets(userId)
         val tickets = ticketsOkResponse?.details ?: emptyList()
         val description = ticketsOkResponse?.description
         val ticketsAsText = tickets.joinToString("\n")
 
-        val successConnectionText = """
-🎉 Поздравляем! Ваш заказ $ticket участвует в акции!
+        val successConnectionText = if (ticketsOkResponse != null && !ticketsOkResponse.isError) """
+🎉 Поздравляем! Ваш заказ ${ticketsOkResponse.details.firstOrNull()} участвует в акции!
 
-$description: ${ticketsOkResponse?.total}
+$description: ${ticketsOkResponse.total}
 
+$ticketsAsText 
+
+$promoText
+        """.trimIndent() else """
 $ticketsAsText 
 
 $promoText
@@ -100,9 +103,13 @@ $promoText
         val tickets = ticketsOkResponse?.details
         val ticketsAsText = tickets?.joinToString("\n") ?: ""
 
-        val text = """
-${ticketsOkResponse?.description}: ${ticketsOkResponse?.total}
+        val text = if (tickets != null && ticketsOkResponse.total != 0) """
+${ticketsOkResponse.description}: ${ticketsOkResponse.total}
 
+$ticketsAsText 
+
+$promoText
+        """.trimIndent() else """
 $ticketsAsText 
 
 $promoText
