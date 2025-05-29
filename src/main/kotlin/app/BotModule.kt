@@ -99,25 +99,32 @@ $promoText
     }
 
     private suspend fun getTickets(chatId: Long, telegramUserId: Long) {
-        val ticketsOkResponse = oneCService.getTickets(telegramUserId)
-        val tickets = ticketsOkResponse?.details
-        val ticketsAsText = tickets?.joinToString("\n") ?: ""
+        val ticketsOkResponseList = oneCService.getTickets(telegramUserId)
+        val stringBuilder = StringBuilder()
+        ticketsOkResponseList?.forEach {
+            val ticketsOkResponse = it
+            val tickets = ticketsOkResponse.details
+            val ticketsAsText = tickets.joinToString("\n")
 
-        val text = if (tickets != null && ticketsOkResponse.total != 0) """
+            val text = if (ticketsOkResponse.total != 0) """
 ${ticketsOkResponse.description}: ${ticketsOkResponse.total}
-
 $ticketsAsText 
 
-$promoText
-        """.trimIndent() else """
+            """.trimIndent() else """
 $ticketsAsText 
+            """.trimIndent()
 
+            stringBuilder.appendLine(text)
+        }
+
+        stringBuilder.appendLine("""
 $promoText
-        """.trimIndent()
+        """.trimIndent())
+
 
         botInstance.sendMessage(
             chatId = ChatId.Companion.fromId(chatId),
-            text = "$MY_TICKETS:\n$text",
+            text = "$MY_TICKETS:\n${stringBuilder}",
             replyMarkup = replyKeyboard
         )
     }

@@ -48,7 +48,7 @@ data class OkResponse(
     val description: String,
     @SerialName("Total")
     val total: Int = 0,
-    var isError: Boolean,
+    var isError: Boolean = false,
 
 )
 
@@ -107,7 +107,7 @@ class OneCService(val app: Application, ) {
     }
 
 
-    suspend fun getTickets(telegramUserId: Long): OkResponse? {
+    suspend fun getTickets(telegramUserId: Long): List<OkResponse>? {
         val ticketsRequest = Json.encodeToString(GetTicketsRequest(
             telegramUserId
         ))
@@ -117,18 +117,21 @@ class OneCService(val app: Application, ) {
             setBody(ticketsRequest)
         }
 
-        return response.toOkResponse()
+        return response.toOkResponseList()
     }
 
-    private suspend fun HttpResponse.toOkResponse() = try {
-        val okResponse = Json.decodeFromString<List<OkResponse>>(bodyAsText())
+    private suspend fun HttpResponse.toOkResponse(): OkResponse? = try {
+        val jsonBody = bodyAsText()
+        val okResponse = Json.decodeFromString<List<OkResponse>>(jsonBody)
         app.log.info("==> OkResponse: $okResponse")
-        okResponse.first().apply {
+        val r = okResponse.first().apply {
             isError = false
         }
+        r
     } catch (e: SerializationException) {
         try {
-            val errorResponse = Json.decodeFromString<List<ErrorResponse>>(bodyAsText()).first()
+            val jsonBody = bodyAsText()
+            val errorResponse = Json.decodeFromString<List<ErrorResponse>>(jsonBody).first()
             app.log.warn("==> ErrorResponse: $errorResponse")
             OkResponse(
                 listOf(errorResponse.details),
@@ -139,6 +142,18 @@ class OneCService(val app: Application, ) {
             app.log.error("==> SerializationException: ${e.message}")
             null
         }
+    }
+
+    private suspend fun HttpResponse.toOkResponseList(): List<OkResponse>? = try {
+        val jsonBody = bodyAsText()
+        val okResponse = Json.decodeFromString<List<OkResponse>>(jsonBody)
+        app.log.info("==> OkResponse: $okResponse")
+        okResponse
+    } catch (e: SerializationException) {
+
+            app.log.error("==> SerializationException: ${e.message}")
+            null
+
     }
 
 
